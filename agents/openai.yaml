@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dev Memory · 开发记忆"
+  short_description: "自动维护三份开发记录，按完整任务提交 Git，并支持交接与接手"
+  default_prompt: "使用 $dev-memory 为当前项目启用三份开发记忆文档、任务完成后的本地 Git 提交和 Codex Hooks。"
