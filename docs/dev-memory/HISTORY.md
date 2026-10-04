@@ -25,10 +25,11 @@
 ## H-002 · 2026-10-04 · 比较已有方案并准备独立开源发布
 
 - 目标与验收：深入比较三个已有方案，明确值得借鉴的能力及成本；完善带图 README，并将本 Skill 独立推送到新的公开 GitHub 仓库。
-- 状态：本地比较和发布材料已完成；公开仓库 [Jack15678/dev-memory](https://github.com/Jack15678/dev-memory) 已创建并推送。首轮 CI 中 Linux 通过；Windows 测试现场的路径归一化已修正，待下一轮 CI 确认。
+- 状态：已完成；公开仓库 [Jack15678/dev-memory](https://github.com/Jack15678/dev-memory) 已创建并推送。修正 Windows 测试现场的路径归一化后，[第二轮 CI](https://github.com/Jack15678/dev-memory/actions/runs/37215025159) 在 Windows/Linux、Python 3.10 上均通过 14 项测试，验证提交为 `2956df7`。
 - 行为变化：新增源码对比报告、英文说明、两张 SVG 图和 Windows/Linux CI；中文 README 补充安装、实际使用、提交策略选择和已知限制。运行脚本与 Skill 核心协议未改变。
 - 来源与取舍：见 [D-005](DECISIONS.md#d-005)；详细发现与固定版本证据只维护在 [对比报告](../comparison.zh-CN.md)，不重复抄入本记录。
 - 本轮验证：在本项目运行 `python -X utf8 -m unittest discover -s tests -v`，14 项通过；skill-creator 的 `quick_validate.py` 通过。两张 SVG 渲染为 PNG 并人工视觉检查，文字无裁切、步骤和文件归属清晰。
 - 实际观察：本轮会话收到 dev-memory 的维护规则与回执提示；这补充了上下文注入的观察，仍不代表完整 Stop/PreCompact 生命周期经过实际宿主验证。
 - 失败与修正：[首轮 CI](https://github.com/Jack15678/dev-memory/actions/runs/37214910700) 的 Windows 临时目录含 `RUNNER~1` 短路径。测试直接调用 Hook 时传入未归一化 project，而 Hook 的 cwd 已 resolve，导致同一目录被判断为范围外。实际 CLI 已在入口 resolve project；测试 fixture 现同样归一化后再调用，未改变运行协议。
-- 版本：随包含 H-002 的发布准备提交保存；远程结果在实际完成后更新。不纳入其他项目、研究临时文件、机器路径 Hook 配置或 `.dev-memory/` 运行状态。
+- 发布核对：远程为 PUBLIC，默认分支 main；独立树包含 23 个项目文件，未包含其他项目或本机运行状态。通过 GitHub README 渲染接口确认两张 SVG 引用和替代文本正常。
+- 版本：沿用子目录历史提取独立发布分支；源仓库 `c7ae79f` 对应首次公开提交 `cb97a33`，测试修正源提交 `c0aa9f7` 对应公开 `2956df7`。本条最终状态随后续文档提交保存。
