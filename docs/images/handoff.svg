@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="370" viewBox="0 0 1200 370" role="img" aria-labelledby="title desc">
+  <title id="title">Dev Memory handoff: capture, snapshot, verify, resume</title>
+  <desc id="desc">Save task notes, generate a temporary snapshot with Git metadata and record pointers, check the actual checkout in the next session, then continue within the latest user instructions. Uncommitted files must be transferred separately when changing workspaces.</desc>
+  <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="none" stroke="#54655e" stroke-width="1.4"/></marker></defs>
+  <rect width="1200" height="370" rx="24" fill="#f5f6f0"/>
+  <g font-family="Segoe UI,Arial,sans-serif">
+    <text x="48" y="48" font-size="14" font-weight="700" letter-spacing="3" fill="#49715a">DEV MEMORY / 02</text>
+    <text x="48" y="98" font-size="36" font-weight="700" fill="#1c3026">A new session starts from checked context.</text>
+    <g fill="#fff" stroke="#d3ddd6">
+      <rect x="48" y="137" width="252" height="143" rx="16"/>
+      <rect x="332" y="137" width="252" height="143" rx="16"/>
+      <rect x="616" y="137" width="252" height="143" rx="16"/>
+      <rect x="900" y="137" width="252" height="143" rx="16"/>
+    </g>
+    <g fill="#1c3026" font-size="24" font-weight="700">
+      <text x="70" y="178">1. Capture</text><text x="354" y="178">2. Snapshot</text>
+      <text x="638" y="178">3. Verify</text><text x="922" y="178">4. Resume</text>
+    </g>
+    <g fill="#54655e" font-size="18">
+      <text x="70" y="219">Goal, progress, limits,</text><text x="70" y="247">tests and next action.</text>
+      <text x="354" y="219">Saved notes + Git state</text><text x="354" y="247">+ document pointers.</text>
+      <text x="638" y="219">Actual HEAD, dirty files,</text><text x="638" y="247">relevant code and rules.</text>
+      <text x="922" y="219">Continue with the latest</text><text x="922" y="247">user instructions.</text>
+    </g>
+    <g fill="none" stroke="#54655e" stroke-width="2" marker-end="url(#arrow)">
+      <path d="M303 208H324"/><path d="M587 208H608"/><path d="M871 208H892"/>
+    </g>
+    <text x="600" y="321" font-size="18" text-anchor="middle" fill="#1c3026">The handoff is a temporary snapshot, not a fourth long-term document.</text>
+    <text x="600" y="349" font-size="15" text-anchor="middle" fill="#54655e">Changing workspaces? Transfer the actual uncommitted files separately.</text>
+  </g>
+</svg>

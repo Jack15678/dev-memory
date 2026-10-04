@@ -1,89 +1,124 @@
 # Dev Memory · 开发记忆
 
-让 agent 自动维护三份职责清楚的文档，完成一个完整的小任务后把代码与记录一起提交到本地 Git，并支持交接给新会话。
+**让代码之外的理由，也留在项目里。**
 
-| 文档 | 负责回答 |
-|---|---|
-| `HISTORY.md` | 改了什么、为什么改、试过什么、验证到哪、对应哪个版本？ |
-| `DECISIONS.md` | 当时为什么这样选择、哪些特殊处理还有效、何时应该重新考虑？ |
-| `KNOWLEDGE.md` | 有哪些能带到其他项目的经验或想法，适用边界是什么？ |
+[English](README.en.md) · [完整对比](docs/comparison.zh-CN.md) · [Skill 规则](SKILL.md) · [MIT](LICENSE)
 
-同一事实只在一处完整维护，其他位置引用编号。Handoff 是按需生成的快照，不新增第四份长期文档。
+[![Runtime tests](https://github.com/Jack15678/dev-memory/actions/workflows/tests.yml/badge.svg)](https://github.com/Jack15678/dev-memory/actions/workflows/tests.yml)
 
-## 开始使用
+Agent 写代码很快，但过几天，你可能已经忘记：为什么暂时硬编码？为什么否决了另一个方案？哪些测试真的跑过？换个会话，又得从头解释。
 
-运行条件：支持文件读写与命令执行的 agent、Python 3.10+；版本保存需要已有 Git 仓库。脚本仅用标准库，不调用额外模型 API，不在后台启动另一个 agent。
+Dev Memory 是一个优先适配 Codex 的开发记忆 Skill。它让当前 agent 按需维护三份 Markdown 文档，完成一个完整的小任务后把代码与记录一起提交到本地 Git，并在换会话时生成可核对的交接快照。
 
-将 `SKILL.md`、`agents/`、`references/`、`assets/`、`scripts/` 和 `LICENSE` 放入个人 Skills 目录中的 `dev-memory/`。本机 Codex 的个人目录为 `~/.codex/skills`；当前官方也支持 `~/.agents/skills`。选择一个位置安装，避免同名重复。
+![三份文档分别保存修改历史、设计理由和可复用经验；任务验证后，代码与相关记录一起提交 Git](docs/images/memory-map.svg)
 
-在要启用的具体项目中说：
+## 三份文档，各自回答一个问题
+
+| 文件 | 回答什么 | 什么时候更新 |
+|---|---|---|
+| `HISTORY.md` | 改了什么、直接原因、试过什么、验证到哪、对应哪个版本？ | 有意义的修改、排查或验证形成时 |
+| `DECISIONS.md` | 为什么这样设计？特殊处理和硬编码何时应该重审？ | 持续影响后续开发的选择形成或改变时 |
+| `KNOWLEDGE.md` | 什么经验可以复用？证据和适用边界是什么？ | 确实有可复用发现时 |
+
+同一事实只在一处完整维护，其他条目引用 H/D/K 编号。没有新信息就不写，不强制每轮更新三个文件。
+
+## 安装与启用
+
+需要能读写文件、执行命令的 agent，以及 **Python 3.10+**。版本保存使用已有 Git 仓库；脚本只依赖 Python 标准库。
+
+先把仓库放进个人 Skill 目录。以下使用 Codex 当前文档中的 `~/.agents/skills`；若已有同名 Skill，请沿用原位置，避免重复安装。
+
+**macOS / Linux**
+
+```sh
+mkdir -p ~/.agents/skills
+git clone https://github.com/Jack15678/dev-memory.git ~/.agents/skills/dev-memory
+```
+
+**Windows PowerShell**
+
+```powershell
+New-Item -ItemType Directory -Force "$env:USERPROFILE/.agents/skills" | Out-Null
+git clone https://github.com/Jack15678/dev-memory.git "$env:USERPROFILE/.agents/skills/dev-memory"
+```
+
+然后进入**你实际开发的项目**，对 agent 说：
 
 ```text
 使用 $dev-memory 为当前项目启用开发记忆和 Codex Hooks。
 ```
 
-初始化会创建三份文档、项目配置和 AGENTS 维护约定，并合并项目内的 `.codex/hooks.json`。在该项目启动的 Codex 中通过 `/hooks` 审阅并信任生成的 Hook。它不会改全局 Hook、覆盖其他 Hook，或替你绕过宿主信任。
+初始化会创建缺少的文档、`.dev-memory.json`、AGENTS 维护约定，并合并项目内 `.codex/hooks.json`。项目默认采用「完整任务完成并验证后自动本地提交」策略。安装 Skill 本身不会批量启用其他项目。
 
-若新 Skill 未出现在列表中，可重启宿主刷新，或直接让 agent 读取本项目 [SKILL.md](SKILL.md)。安装 Skill 不会给所有项目自动启用文档或提交策略。
+在目标项目的 Codex CLI 中通过 `/hooks` 审阅并信任生成的配置。新建或改变的 Hook 需要宿主审阅；配置存在不等于已启用。若新 Skill 尚未显示，重启 Codex 刷新。依据：[官方 Skill 位置](https://learn.chatgpt.com/docs/build-skills)、[Hook 信任机制](https://learn.chatgpt.com/docs/hooks)。
 
-## 日常工作
+### 按你的习惯使用
 
-- 出现有价值的新事实、决定或经验时，agent 及时更新相应文档。
-- 完整小任务完成并做了适当验证后，agent 自动提交本任务的代码和记录；不会把其他任务的改动一起提交。
-- 未完成任务保留真实进度与验证缺口；没有新信息不刷新日期、不凑日志。
-- 「先讨论」「只回答」「不落盘」可以覆盖本轮自动记录。追溯设计原因默认只读。
+- **只记录、不自动提交**：告诉 agent「将当前项目 `.dev-memory.json` 的 `git_policy` 设为 `manual`，只维护记录，由我提交」。策略由 agent 遵守，脚本不执行提交。
+- **首次启用不装 Hooks**：告诉 agent「使用 dev-memory，但初始化时选择 `--hooks none`」。仍可按 Skill 维护记录和交接；该参数不会删除已有 Hook。
+- **本轮只讨论**：直接说「先讨论，不修改文件」。当前操作边界优先。
+
+## 一个例子
+
+以下为虚构示例，用于说明分工：
+
+> 用户：首版上传上限固定为 20 MiB，先不做配置入口；有真实大文件需求再考虑。
+
+Agent 将这个选择的来源、理由、代价、常量位置和重审条件写进 **D-004**。修改上传校验后，在 **H-012** 记录行为变化与实际边界测试，引用 D-004；本次没有通用经验，**KNOWLEDGE 保持不变**。
+
+完整任务验证后，代码与记录一起提交。过一周问「为什么上限写死了」，agent 可以找到当时约束与出处。理由没有记录时，应明确说未知，不能从现有代码补编历史。
+
+## 换会话，继续工作
 
 ```text
-修复切换文件后仍显示旧结果的问题。
-为什么这里保留固定大小上限？依据是什么？
-把当前任务交接一下，我准备换个对话。
-使用 $dev-memory 读取这个交接包并继续，先核对实际版本。
+使用 $dev-memory 交接当前任务，我准备换个会话。
 ```
 
-一条记录的例子（虚构）：
+![交接分为保存当前任务、生成快照、新会话核对现场、继续工作四步](docs/images/handoff.svg)
 
-> H-012：新增超限提示，依据 D-004；实际验证文件边界测试通过；随包含 H-012 的提交保存。
->
-> D-004：首版固定上限由用户选择，代价是拒绝部分大文件；出现真实需求后重审；常量位置为上传校验入口。
->
-> KNOWLEDGE 不变，因为这次选择尚未产生可跨项目复用的经验。
+新会话中提供生成的快照路径：
 
-## Hook 如何工作
+```text
+使用 $dev-memory 读取这个交接文件。先核对实际 HEAD 和工作区，再按当前授权继续。
+```
 
-Skill 定义什么值得写、写到哪里和什么时候提交。Hook 用于提醒当前 agent 检查遗漏，不理解或代写设计理由，也不执行 Git 提交。
+交接快照包含已保存的任务摘要、Git 状态和文档入口，保存在本地忽略的 `.dev-memory/` 中。它是临时产物；换机器或 worktree 时，还需要单独转移实际未提交文件。任务尚未完成时不为交接强行提交。
 
-| 事件 | 行为 |
+## 自动化是怎样工作的
+
+| 事件 | 作用 |
 |---|---|
-| SessionStart | 提供文档入口与维护约定；压缩后提供快照入口 |
-| UserPromptSubmit | 提供当前回合标识，供 agent 完成检查后回执 |
-| Stop | 只读检查；未回执时请求补查一次，宿主标明已经续过本轮则放行 |
-| PreCompact | 本轮已有允许记录的回执时，从已有 checkpoint 和 Git 现场生成快照；无回执或只读则跳过 |
+| `SessionStart` | 提供维护规则、文档及已有交接入口 |
+| `UserPromptSubmit` | 提供本轮标识与记录检查回执方式 |
+| `Stop` | 只读检查遗漏，必要时请求当前 agent 补查一轮 |
+| `PreCompact` | 本轮已有允许记录的回执时，从已保存笔记和 Git 状态生成快照 |
 
-首版自动 Hook 适配 Codex 本地运行。其他 agent 可用同一 Skill 和交接材料，但 Hook 配置需适配其宿主。Hook 信任、配置加载和语义记录质量是不同环节；脚本测试通过不等于所有宿主都已自动触发。
+**Hook 负责触发检查，当前 agent 负责判断和记录。** 没有额外记录 agent、模型 API 或数据库。主 agent 的记录与补查仍会消耗正常上下文和推理资源。
 
-## 脚本入口
+详细命令见 [运行说明](references/runtime.md)，交接步骤见 [handoff](references/handoff.md)。
 
-在本目录运行以下命令；用于其他项目时把 `.` 换成项目路径。已经安装时使用安装目录下脚本的实际路径。
+## 适用范围与已知限制
+
+适合使用 Git、经常换会话、想保留设计理由的个人开发者。核心文档流程不依赖项目语言；首次版本的自动 Hook 仅适配 Codex。
+
+- 14 项运行时测试与独立修改提交、只读接手试用见 [H-001](docs/dev-memory/HISTORY.md#h-001)。CI 使用真实临时 Git 仓库，在 Windows 和 Linux 上运行协议检查。
+- 当前实际会话已观察到上下文提示注入；完整压缩/停止生命周期及长期记录质量仍需持续验证。模拟事件通过不等于宿主全流程验证。
+- macOS、其他 agent 的自动 Hook，以及多人/多 agent 同时修改同一份文档，尚未完成验证。
+- 记录质量依赖 agent；没有自动语义审计、全文检索服务或稳定编号的并发分配器。
+- 没有 Git 时可以保存记录，但不会自动初始化仓库。已有无关改动需要保留；本地提交策略不包含推送。
+
+## 与现有方案的关系
+
+工程记忆、决策记录和交接都有已有实践。Dev Memory 选择三份长期文档、按任务保存 Git 版本、临时交接快照这一组合。
+
+我们阅读了 [OwnMem](https://github.com/grpcer/ownmem)、[Fractal Skills](https://github.com/yaukwan/fractal-skills)，并核对了 [LINUX DO 的 Codex 交接 Skill 说明](https://linux.do/t/topic/2230307/3)。各自的数据组织、自动维护方式、可借鉴能力和证据边界见 [完整对比](docs/comparison.zh-CN.md)。本仓库未复制这些项目的实现或模板。
+
+## 开发与反馈
 
 ```sh
-python scripts/dev_memory.py init --project . --hooks codex
-python scripts/dev_memory.py checkpoint --project . --session local-handoff --summary "当前目标与进度" --next "接手后的第一个动作" --constraints "当前操作边界" --verification "已运行检查与缺口"
-python scripts/dev_memory.py handoff --project . --session local-handoff
-python -m unittest discover -s tests -v
+python -X utf8 -m unittest discover -s tests -v
 ```
 
-`handoff` 不带 `--output` 时只输出文本；需要文件时指定新路径。它不打包补丁、未跟踪文件或原始聊天，接手者仍须能访问对应代码。`.dev-memory/` 中的运行状态和快照被本地忽略；长期文档随代码提交。
+欢迎通过 Issue 提供：使用的 agent 和系统、最小操作步骤、预期行为，以及经过脱敏的实际记录。特别希望了解哪些信息漏记了、哪些记录变成了噪声、接手时还需要补问什么。
 
-完整命令和回执协议见 [运行说明](references/runtime.md)，交接字段与接手步骤见 [交接流程](references/handoff.md)。
-
-## 验证
-
-14 项运行时检查通过，覆盖初始化和既有配置保留、Hook 回执与防循环、只读边界及不同 Git 状态下的交接。Skill 已通过 skill-creator 格式检查，以及独立的修改提交和只读接手试用。证据及验证范围见 [H-001](docs/dev-memory/HISTORY.md#h-001)；实际宿主自动触发尚未验证。
-
-## 依据与替代方案
-
-- [ADR 原始说明](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions)：已有的轻量决策记录方法。
-- [OpenAI 官方 Skills 文档](https://learn.chatgpt.com/docs/build-skills)及 [Hooks 文档](https://learn.chatgpt.com/docs/hooks)：Skill 结构和宿主生命周期事件。
-- [Anthropic 的长任务工程实践](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents)：通过明确进度、Git 和验证结果支持跨会话接续。
-
-这些方式也可以手工组合。Dev Memory 的作用是固定分工、维护时机与交接步骤，不主张发明了决策记录或 Git 版本管理。MIT 许可。
+MIT 许可。开发流程参考 [ADR](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions) 与 [跨会话任务实践](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents)。

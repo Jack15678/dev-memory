@@ -43,3 +43,15 @@
 - 接受的代价：快照会过期，且不携带未提交文件、运行中的进程或完整聊天。接手者须重新核对实际现场；生成快照本身不会创建会话或派发 agent。
 - 重审条件：跨工作区转移真实代码成为常见需求时，另行设计用户明确授权的数据转移流程。
 - 实现入口：`references/handoff.md`；`scripts/dev_memory.py` 的 `checkpoint`、`make_handoff`、`git_snapshot`。
+
+<a id="d-005"></a>
+## D-005 · 2026-10-04 · 独立公开发布，并按证据比较已有方案
+
+- 状态：已采用。
+- 来源：用户明确要求深入比较 OwnMem、Fractal Skills 和 Codex 交接 Skill，并授权新建 GitHub 仓库、推送和制作 README 图片。
+- 选择与理由：在当前已登录账号下使用独立仓库 `Jack15678/dev-memory`。从上级多项目仓库仅提取 `dev-memory/` 的历史和文件，保持公开内容集中于本 Skill。
+- 发布材料：中文和英文 README、两张可编辑 SVG 流程图、Windows/Linux 运行时 CI，以及固定来源版本的 `docs/comparison.zh-CN.md`。
+- 研究边界：前两个项目做源码静态比较；交接 ZIP 未能获取，严格标明只核验公开说明。比较中的改进点属于建议，没有自动转成新的运行协议。
+- 接受的代价：公开发行仍为早期版本；自动 Hook 跨宿主、长时间记录质量和多人并发仍需真实验证。
+- 重审条件：用户要求实现某项改进、实际反馈证明现有结构不足，或上游版本变化影响比较结论时再更新。
+- 实现入口：`README.md`、`README.en.md`、`docs/comparison.zh-CN.md`、`docs/images/`、`.github/workflows/tests.yml`。
