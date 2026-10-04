@@ -64,9 +64,11 @@ Illustrative scenario:
 
 > Keep the upload cap at 20 MiB for the first version. Do not add a configuration option until a real need appears.
 
-The agent records the choice, source, tradeoff, code location and revisit condition in **D-004**. After modifying validation, **H-012** records the change and actual boundary checks, with a reference to D-004. **KNOWLEDGE stays unchanged** if no reusable lesson emerged.
+The agent records the choice, source, tradeoff, code location and revisit condition in **D-004**, including when to read it: before changing upload validation or size hints. After modifying validation, **H-012** records the change, actual boundary checks and the commit or uncommitted working state they apply to, with a reference to D-004. **KNOWLEDGE stays unchanged** if no reusable lesson emerged.
 
 Once the task is complete and appropriately checked, code and records go into one commit. A later “Why is this hardcoded?” can be answered from the recorded evidence. Missing historical rationale stays unknown.
+
+If the code later allows 100 MiB, the agent first looks for a new decision. Without supporting evidence, it records the conflict with the approved 20 MiB rule and preserves that decision. An existing test file, a past passing result and a test run in the current task are recorded separately; past success does not establish that the current code passes.
 
 ## Handoff and resume
 
@@ -102,6 +104,7 @@ See the [runtime reference](references/runtime.md) and [handoff guide](reference
 Best suited to individual developers who use Git, switch sessions and want to retain design rationale. The document workflow is language-independent; automatic hooks currently target Codex.
 
 - Fourteen runtime tests and independent edit/commit and read-only resume trials are recorded in [H-001](docs/dev-memory/HISTORY.md#h-001). CI runs protocol checks in real temporary repositories on Windows and Linux.
+- An independent resume trial in [H-003](docs/dev-memory/HISTORY.md#h-003) preserved an approved constraint despite conflicting code and identified that historical test results did not cover an uncommitted change. This validates one synthetic scenario.
 - Maintenance-context injection has been observed in an actual session. Full host stop/compaction behavior and long-term record quality need further use; protocol tests are not complete host validation.
 - macOS, other agents' hooks, and concurrent agents editing the same memory documents have not been validated.
 - The skill relies on agent judgment. It does not provide semantic auditing, a search service or concurrent ID allocation.
