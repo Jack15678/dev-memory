@@ -23,6 +23,8 @@ class MemoryTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.project = Path(self.temp.name) / "中文 项目"
         self.project.mkdir()
+        # Match the CLI boundary: Windows runner temp paths may use 8.3 aliases.
+        self.project = self.project.resolve()
         self.git("init", "-b", "main")
         self.git("config", "user.email", "dev-memory@example.invalid")
         self.git("config", "user.name", "Dev Memory Test")
